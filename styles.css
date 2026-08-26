@@ -37,6 +37,7 @@ h2{font-size:1.05rem;margin:0 0 14px}
 .grid{display:grid;gap:12px}
 .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
 label{display:flex;flex-direction:column;gap:7px;font-size:.87rem;color:var(--muted);font-weight:700}
+.field-title{display:inline;white-space:nowrap}
 input,select{
   width:100%;border:1px solid #355071;border-radius:12px;background:#081426;color:var(--text);
   padding:13px 12px;min-height:48px;outline:none
