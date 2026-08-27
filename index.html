@@ -10,14 +10,14 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=1.3">
   <title>POTA Field Logger</title>
 </head>
 <body>
   <div id="app">
     <header class="topbar">
       <div>
-        <h1>POTA Field Logger</h1>
+        <div class="title-line"><h1>POTA Field Logger</h1><span id="versionBadge" class="version-badge">v1.3</span></div>
         <div id="utcClock" class="utc-clock">UTC --:--:--</div>
       </div>
       <button id="homeBtn" class="ghost small" hidden>Home</button>
@@ -152,6 +152,6 @@
     </form>
   </dialog>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=1.3"></script>
 </body>
 </html>

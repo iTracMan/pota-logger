@@ -25,7 +25,9 @@ button{cursor:pointer}
   background:rgba(7,16,31,.92);backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line)
 }
-.topbar h1{font-size:1.2rem;margin:0 0 3px}
+.topbar h1{font-size:1.2rem;margin:0}
+.title-line{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+.version-badge{display:inline-block;padding:3px 7px;border:1px solid var(--line);border-radius:999px;font-size:.68rem;font-weight:900;letter-spacing:.04em;color:var(--muted);background:#0b1729}
 .utc-clock{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700}
 main{max-width:900px;margin:0 auto;padding:18px}
 .card{

@@ -1,6 +1,7 @@
 
 "use strict";
 
+const APP_VERSION = "1.3";
 const BANDS = ["160M","80M","60M","40M","30M","20M","17M","15M","12M","10M","6M","4M","2M","1.25M","70CM","33CM","23CM"];
 const MODES = ["SSB","CW","FM","AM","FT8","FT4","RTTY","PSK31","MFSK","JS8"];
 const ADIF_MODE = {
@@ -94,6 +95,10 @@ function setDefaults(){
 function tickClock(){
   const u = utcParts();
   $("utcClock").textContent = `UTC ${u.display}`;
+}
+function showVersion(){
+  const badge = $("versionBadge");
+  if(badge) badge.textContent = `v${APP_VERSION}`;
 }
 setInterval(tickClock,1000);
 tickClock();
@@ -419,7 +424,7 @@ function adifTag(name, value){
 function buildAdif(a){
   const lines = [];
   lines.push("POTA Field Logger");
-  lines.push(`${adifTag("PROGRAMID","POTA Field Logger")} ${adifTag("PROGRAMVERSION","1.2")} ${adifTag("CREATED_TIMESTAMP", utcParts().date+" "+utcParts().time)} <EOH>`);
+  lines.push(`${adifTag("PROGRAMID","POTA Field Logger")} ${adifTag("PROGRAMVERSION",APP_VERSION)} ${adifTag("CREATED_TIMESTAMP", utcParts().date+" "+utcParts().time)} <EOH>`);
   for(const q of a.qsos){
     const modeInfo = ADIF_MODE[q.mode] || {mode:q.mode};
     const fields = [
@@ -450,7 +455,7 @@ function csvEscape(v){
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
 }
 function buildCsv(a){
-  const rows = [["Station","Park","QSO Date UTC","Time UTC","Call","Name","Band","Mode","P2P Park","Latitude","Longitude","Grid"]];
+  const rows = [["Station","Park","QSO Date UTC (DD-MM-YYYY)","Time UTC (HH:MM:SS)","Call","Name","Band","Mode","P2P Park","Latitude","Longitude","Grid"]];
   for(const q of a.qsos){
     rows.push([a.stationCall,a.parkRef,csvDate(q.date),csvTime(q.time),q.call,q.name,q.band,q.mode,q.p2pPark,
       a.location?.lat ?? "",a.location?.lon ?? "",a.location ? maidenhead(a.location.lat,a.location.lon).toUpperCase() : ""]);
@@ -465,10 +470,20 @@ function downloadText(filename, text, mime){
   setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 function safeName(s){ return String(s).replace(/[^A-Z0-9-]+/gi,"_"); }
-function exportAdif(){
+async function exportAdif(){
   const a = currentActivation(); if(!a) return;
   const filename = `${safeName(a.stationCall)}@${safeName(a.parkRef)}-${a.startDate}.adi`;
-  downloadText(filename, buildAdif(a), "application/octet-stream");
+  const text = buildAdif(a);
+  try{
+    const file = new File([text], filename, {type:"application/octet-stream"});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:"POTA ADIF log"});
+      return;
+    }
+  }catch(err){
+    if(err && err.name === "AbortError") return;
+  }
+  downloadText(filename, text, "application/octet-stream");
 }
 function exportCsv(){
   const a = currentActivation(); if(!a) return;
@@ -517,9 +532,15 @@ document.addEventListener("keydown",e=>{
   }
 });
 
+showVersion();
 setDefaults();
 renderHome();
 
 if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  window.addEventListener("load", async ()=>{
+    try{
+      const registration = await navigator.serviceWorker.register("./sw.js", {updateViaCache:"none"});
+      registration.update().catch(()=>{});
+    }catch(err){}
+  });
 }

@@ -1,5 +1,14 @@
-const CACHE = "pota-field-logger-v3";
-const ASSETS = ["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icons/icon-192.png","./icons/icon-512.png","./icons/icon-180.png"];
+const CACHE = "pota-field-logger-v1.3";
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./styles.css?v=1.3",
+  "./app.js?v=1.3",
+  "./manifest.webmanifest",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/icon-180.png"
+];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
@@ -7,17 +16,28 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k.startsWith("pota-field-logger-") && k !== CACHE).map(k => caches.delete(k)))
+    )
+  );
   self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
   if(event.request.method !== "GET") return;
+  if(new URL(event.request.url).origin !== self.location.origin) return;
+
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+    fetch(event.request).then(response => {
       const copy = response.clone();
       caches.open(CACHE).then(cache => cache.put(event.request, copy));
       return response;
-    }).catch(() => caches.match("./index.html")))
+    }).catch(async () => {
+      const cached = await caches.match(event.request);
+      if(cached) return cached;
+      if(event.request.mode === "navigate") return caches.match("./index.html");
+      throw new Error("Offline resource unavailable");
+    })
   );
 });

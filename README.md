@@ -35,3 +35,12 @@ Data stays in browser local storage on the device. Export ADIF/CSV after an acti
 - CSV uses human-readable UTC time `HH:MM:SS`.
 - ADIF still uses the required compact `YYYYMMDD` / `HHMMSS` values.
 - ADIF download uses a binary MIME type to reduce the chance that iPadOS appends `.txt`.
+
+
+## Version 1.3
+- Visible `v1.3` badge in the app header.
+- Full-package release; no update-only ZIP.
+- Network-first service-worker strategy so GitHub updates are preferred whenever online.
+- Versioned CSS/JavaScript URLs to reduce stale-cache problems.
+- ADIF export uses the iPad/iPhone share sheet when supported, carrying an explicit `.adi` filename.
+- CSV exports dates as `DD-MM-YYYY` and times as `HH:MM:SS`.
