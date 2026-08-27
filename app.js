@@ -44,6 +44,15 @@ function prettyDate(yyyymmdd){
   if(!yyyymmdd || yyyymmdd.length !== 8) return yyyymmdd || "";
   return `${yyyymmdd.slice(6,8)}/${yyyymmdd.slice(4,6)}/${yyyymmdd.slice(0,4)}`;
 }
+function csvDate(yyyymmdd){
+  if(!yyyymmdd || yyyymmdd.length !== 8) return yyyymmdd || "";
+  return `${yyyymmdd.slice(6,8)}-${yyyymmdd.slice(4,6)}-${yyyymmdd.slice(0,4)}`;
+}
+function csvTime(hhmmss){
+  if(!hhmmss) return "";
+  const t = String(hhmmss).padEnd(6,"0");
+  return `${t.slice(0,2)}:${t.slice(2,4)}:${t.slice(4,6)}`;
+}
 function maidenhead(lat, lon, precision=6){
   if(!Number.isFinite(lat) || !Number.isFinite(lon)) return "";
   let adjLon = lon + 180, adjLat = lat + 90;
@@ -410,7 +419,7 @@ function adifTag(name, value){
 function buildAdif(a){
   const lines = [];
   lines.push("POTA Field Logger");
-  lines.push(`${adifTag("PROGRAMID","POTA Field Logger")} ${adifTag("PROGRAMVERSION","1.0")} ${adifTag("CREATED_TIMESTAMP", utcParts().date+" "+utcParts().time)} <EOH>`);
+  lines.push(`${adifTag("PROGRAMID","POTA Field Logger")} ${adifTag("PROGRAMVERSION","1.2")} ${adifTag("CREATED_TIMESTAMP", utcParts().date+" "+utcParts().time)} <EOH>`);
   for(const q of a.qsos){
     const modeInfo = ADIF_MODE[q.mode] || {mode:q.mode};
     const fields = [
@@ -443,7 +452,7 @@ function csvEscape(v){
 function buildCsv(a){
   const rows = [["Station","Park","QSO Date UTC","Time UTC","Call","Name","Band","Mode","P2P Park","Latitude","Longitude","Grid"]];
   for(const q of a.qsos){
-    rows.push([a.stationCall,a.parkRef,q.date,q.time,q.call,q.name,q.band,q.mode,q.p2pPark,
+    rows.push([a.stationCall,a.parkRef,csvDate(q.date),csvTime(q.time),q.call,q.name,q.band,q.mode,q.p2pPark,
       a.location?.lat ?? "",a.location?.lon ?? "",a.location ? maidenhead(a.location.lat,a.location.lon).toUpperCase() : ""]);
   }
   return rows.map(r=>r.map(csvEscape).join(",")).join("\r\n")+"\r\n";
@@ -459,7 +468,7 @@ function safeName(s){ return String(s).replace(/[^A-Z0-9-]+/gi,"_"); }
 function exportAdif(){
   const a = currentActivation(); if(!a) return;
   const filename = `${safeName(a.stationCall)}@${safeName(a.parkRef)}-${a.startDate}.adi`;
-  downloadText(filename, buildAdif(a), "text/plain;charset=utf-8");
+  downloadText(filename, buildAdif(a), "application/octet-stream");
 }
 function exportCsv(){
   const a = currentActivation(); if(!a) return;

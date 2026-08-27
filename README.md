@@ -29,3 +29,9 @@ optional MY_GRIDSQUARE, and optional SIG/SIG_INFO for P2P contacts.
 
 ## Data
 Data stays in browser local storage on the device. Export ADIF/CSV after an activation as a backup.
+
+## Version 1.2 export changes
+- CSV uses human-readable UTC date `DD-MM-YYYY`.
+- CSV uses human-readable UTC time `HH:MM:SS`.
+- ADIF still uses the required compact `YYYYMMDD` / `HHMMSS` values.
+- ADIF download uses a binary MIME type to reduce the chance that iPadOS appends `.txt`.
